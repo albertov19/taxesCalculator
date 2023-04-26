@@ -56,7 +56,7 @@ async function calculateForNetwork(network, address) {
   }
 
   // Price File
-  const priceFile = `2022_${tokenTag}_Price`;
+  const priceFile = `${args['year']}_${tokenTag}_Price`;
 
   if (fs.existsSync(path.resolve(`./priceJSONs/${priceFile}.json`))) {
     await calculateData(priceFile, tokenTag, address);
@@ -93,16 +93,14 @@ async function generateJSON(priceFile, tokenTag) {
 }
 
 async function calculateData(priceFile, tokenTag, address) {
-  // Get File Names
-  const stakingFile = `2022_${tokenTag}_${address}`;
-
   // Read JSON Price Data
   const priceDataBuffer = fs.readFileSync(path.resolve(`./priceJSONs/${priceFile}.json`));
   const priceDataJSONString = priceDataBuffer.toString();
   const priceData = JSON.parse(priceDataJSONString);
 
   // Read Staking Data
-  const stakingData = await csv().fromFile(path.resolve(`./CSVs/${stakingFile}.csv`));
+  console.log(priceFile);
+  const stakingData = await csv().fromFile(path.resolve(`./CSVs/${tokenTag}_${address}.csv`));
 
   let totalAmount: number = 0;
   stakingData.forEach((staking) => {
