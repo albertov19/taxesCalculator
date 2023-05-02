@@ -50,7 +50,6 @@ async function main(): Promise<void> {
 async function calculateForNetwork(network: string, address: string): Promise<void> {
   // Check if Token is Supported
   const tokenTag = networkTokenTags[(network as Network).toLowerCase()];
-
   if (!tokenTag) {
     console.error('Only supports polkadot, kusama, moonbeam, and moonriver as input networks');
   }
