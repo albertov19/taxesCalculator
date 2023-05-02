@@ -20,13 +20,13 @@ const networkTokenTags: Record<Network, string> = {
 
 // Inputs
 const args = yargs.options({
-  networks: { type: 'string', demandOption: false, alias: 'n' },
+  networks: { type: 'string', demandOption: true, alias: 'n' },
   addresses: {
     type: 'string',
-    demandOption: false,
+    demandOption: true,
     alias: 'a',
   },
-  year: { type: 'number', demandOption: false, alias: 'y' },
+  year: { type: 'number', demandOption: true, alias: 'y' },
 }).argv;
 
 // Networks and Addresses Array
