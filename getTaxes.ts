@@ -11,27 +11,29 @@ interface PriceData {
   [date: string]: number;
 }
 type Network = 'moonbeam' | 'moonriver' | 'polkadot' | 'kusama';
-const networkTokenTags: Record<Network, string> = {
+const networkTokenTags = {
   moonbeam: 'GLMR',
   moonriver: 'MOVR',
   polkadot: 'DOT',
   kusama: 'KSM',
-};
+} as const;
 
 // Inputs
-const args = yargs.options({
-  networks: { type: 'string', demandOption: true, alias: 'n' },
-  addresses: {
-    type: 'string',
-    demandOption: true,
-    alias: 'a',
-  },
-  year: { type: 'number', demandOption: true, alias: 'y' },
-}).argv;
+const args = yargs
+  .options({
+    networks: { type: 'string', demandOption: true, alias: 'n' },
+    addresses: {
+      type: 'string',
+      demandOption: true,
+      alias: 'a',
+    },
+    year: { type: 'number', demandOption: true, alias: 'y' },
+  })
+  .parseSync();
 
 // Networks and Addresses Array
-const networks = args['networks'] ? args['networks'].split(',') : [];
-const addresses = args['addresses'] ? args['addresses'].split(',') : [];
+const networks: Network[] = args.networks ? (args.networks.split(',') as Network[]) : [];
+const addresses: string[] = args.addresses ? args.addresses.split(',') : [];
 
 // Dates
 const startDate = new Date(Date.UTC(args['year'], 0, 1));
@@ -39,7 +41,7 @@ const endDate = new Date(Date.UTC(args['year'] + 1, 0, 1));
 
 async function main(): Promise<void> {
   if (networks.length != addresses.length) {
-    console.error('Address and network length must be the same!');
+    throw new Error('Address and network length must be the same!');
   }
 
   for (let i = 0; i < networks.length; i++) {
@@ -49,10 +51,10 @@ async function main(): Promise<void> {
 
 async function calculateForNetwork(network: string, address: string): Promise<void> {
   // Check if Token is Supported
-  const tokenTag = networkTokenTags[(network as Network).toLowerCase()];
-  if (!tokenTag) {
-    console.error('Only supports polkadot, kusama, moonbeam, and moonriver as input networks');
+  if (!(network.toLowerCase() in networkTokenTags)) {
+    throw new Error('Only supports polkadot, kusama, moonbeam, and moonriver as input networks');
   }
+  const tokenTag = networkTokenTags[network as Network];
 
   // Price File
   const priceFile = `${args['year']}_${tokenTag}_Price`;
@@ -96,9 +98,9 @@ async function calculateData(priceFile: string, tokenTag: string, address: strin
   // Read Staking Data
   const stakingData = await csv().fromFile(path.resolve(`./CSVs/${tokenTag}_${address}.csv`));
 
-  let totalAmount: number = 0;
+  let totalAmount = 0;
   stakingData.forEach((staking) => {
-    let stakingDate = new Date(staking['Date']);
+    const stakingDate = new Date(staking['Date']);
     const year = stakingDate.getFullYear();
     const month = (stakingDate.getMonth() + 1).toString().padStart(2, '0');
     const day = stakingDate.getDate().toString().padStart(2, '0');
