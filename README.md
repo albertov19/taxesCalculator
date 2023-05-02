@@ -5,6 +5,7 @@ Script to help calculate taxes for Moonbeam | Moonriver | Polkadot | Kusama.
 ## Getting Started
 
 ### Get CSVs of Prices
+(Some token prices are already available in the `priceJSONs` folder, feel free to use those, read the [disclaimer](#disclaimer)).
 
 You'll need the Price info for each token in the currency you want it to calculate it. Best to do it daily. The field that it will read will be a `Close` field in the CSV.
 
