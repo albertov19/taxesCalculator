@@ -72,7 +72,7 @@ async function generateJSON(priceFile: string, tokenTag: string): Promise<void> 
 
   const priceJSON: PriceData = {};
   priceData.forEach((priceDateData) => {
-    const date = new Date(`${priceDateData['Date']}Z`);
+    const date = priceDateData['Date'] ? new Date(`${priceDateData['Date']}Z`) : new Date(`${priceDateData['Start']}Z`);
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
@@ -111,7 +111,7 @@ async function calculateData(priceFile: string, tokenTag: string, address: strin
     }
   });
 
-  console.log(`Staking Rewards for ${tokenTag} in ${startDate.getFullYear()} is ${totalAmount.toFixed(2)} EUR`);
+  console.log(`Staking Rewards for ${tokenTag} in ${startDate.getFullYear()} is ${totalAmount.toFixed(2)}`);
 }
 
 main()
