@@ -99,19 +99,25 @@ async function calculateData(priceFile: string, tokenTag: string, address: strin
   const stakingData = await csv().fromFile(path.resolve(`./CSVs/${tokenTag}_${address}.csv`));
 
   let totalAmount = 0;
+  let stakeAmount = 0;
   stakingData.forEach((staking) => {
     const stakingDate = new Date(staking['Date']);
     const year = stakingDate.getFullYear();
     const month = (stakingDate.getMonth() + 1).toString().padStart(2, '0');
     const day = stakingDate.getDate().toString().padStart(2, '0');
-    if (stakingDate >= startDate && stakingDate <= endDate) {
+    if (stakingDate >= startDate && stakingDate < endDate) {
       priceData[`${year}-${month}-${day}`]
-        ? (totalAmount += parseFloat(staking.Value) * priceData[`${year}-${month}-${day}`])
+        ? ((totalAmount += parseFloat(staking.Value) * priceData[`${year}-${month}-${day}`]),
+          (stakeAmount += parseFloat(staking.Value)))
         : console.log(`No price matching for ${`${year}-${month}-${day}`}`);
     }
   });
 
-  console.log(`Staking Rewards for ${tokenTag} in ${startDate.getFullYear()} is ${totalAmount.toFixed(2)}`);
+  console.log(
+    `Staking Rewards for a total of ${stakeAmount} ${tokenTag} in ${startDate.getFullYear()} is ${totalAmount.toFixed(
+      2
+    )}`
+  );
 }
 
 main()
