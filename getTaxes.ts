@@ -32,7 +32,9 @@ const args = yargs
   .parseSync();
 
 // Networks and Addresses Array
-const networks: Network[] = args.networks ? (args.networks.split(',') as Network[]) : [];
+const networks: Network[] = args.networks
+  ? (args.networks.split(',') as Network[])
+  : [];
 const addresses: string[] = args.addresses ? args.addresses.split(',') : [];
 
 // Dates
@@ -49,10 +51,15 @@ async function main(): Promise<void> {
   }
 }
 
-async function calculateForNetwork(network: string, address: string): Promise<void> {
+async function calculateForNetwork(
+  network: string,
+  address: string
+): Promise<void> {
   // Check if Token is Supported
   if (!(network.toLowerCase() in networkTokenTags)) {
-    throw new Error('Only supports polkadot, kusama, moonbeam, and moonriver as input networks');
+    throw new Error(
+      'Only supports polkadot, kusama, moonbeam, and moonriver as input networks'
+    );
   }
   const tokenTag = networkTokenTags[network as Network];
 
@@ -66,20 +73,27 @@ async function calculateForNetwork(network: string, address: string): Promise<vo
   }
 }
 
-async function generateJSON(priceFile: string, tokenTag: string): Promise<void> {
+async function generateJSON(
+  priceFile: string,
+  tokenTag: string
+): Promise<void> {
   // Load CSV Files
   const priceData = await csv().fromFile(`./CSVs/${priceFile}.csv`);
 
   const priceJSON: PriceData = {};
   priceData.forEach((priceDateData) => {
-    const date = priceDateData['Date'] ? new Date(`${priceDateData['Date']}Z`) : new Date(`${priceDateData['Start']}Z`);
+    const date = priceDateData['Date']
+      ? new Date(`${priceDateData['Date']}Z`)
+      : new Date(`${priceDateData['Start']}Z`);
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     if (date >= startDate && date <= endDate) {
       priceJSON[`${year}-${month}-${day}`] = parseFloat(priceDateData['Close']);
     } else {
-      console.log(`No Price Data for ${tokenTag} on date ${year}-${month}-${day}`);
+      console.log(
+        `No Price Data for ${tokenTag} on date ${year}-${month}-${day}`
+      );
     }
   });
 
@@ -89,14 +103,22 @@ async function generateJSON(priceFile: string, tokenTag: string): Promise<void> 
   console.log(`JSON Price File Generated for ${priceFile}`);
 }
 
-async function calculateData(priceFile: string, tokenTag: string, address: string): Promise<void> {
+async function calculateData(
+  priceFile: string,
+  tokenTag: string,
+  address: string
+): Promise<void> {
   // Read JSON Price Data
-  const priceDataBuffer = fs.readFileSync(path.resolve(`./priceJSONs/${priceFile}.json`));
+  const priceDataBuffer = fs.readFileSync(
+    path.resolve(`./priceJSONs/${priceFile}.json`)
+  );
   const priceDataJSONString = priceDataBuffer.toString();
   const priceData: PriceData = JSON.parse(priceDataJSONString);
 
   // Read Staking Data
-  const stakingData = await csv().fromFile(path.resolve(`./CSVs/${tokenTag}_${address}.csv`));
+  const stakingData = await csv().fromFile(
+    path.resolve(`./CSVs/${tokenTag}_${address}.csv`)
+  );
 
   let totalAmount = 0;
   let stakeAmount = 0;
@@ -107,14 +129,17 @@ async function calculateData(priceFile: string, tokenTag: string, address: strin
     const day = stakingDate.getDate().toString().padStart(2, '0');
     if (stakingDate >= startDate && stakingDate < endDate) {
       priceData[`${year}-${month}-${day}`]
-        ? ((totalAmount += parseFloat(staking.Value) * priceData[`${year}-${month}-${day}`]),
+        ? ((totalAmount +=
+            parseFloat(staking.Value) * priceData[`${year}-${month}-${day}`]),
           (stakeAmount += parseFloat(staking.Value)))
-        : console.log(`No price matching for ${`${year}-${month}-${day}`}`);
+        : console.log(
+            `No price matching for ${tokenTag} - ${`${year}-${month}-${day}`}`
+          );
     }
   });
 
   console.log(
-    `Staking Rewards for a total of ${stakeAmount} ${tokenTag} in ${startDate.getFullYear()} is ${totalAmount.toFixed(
+    `Staking Rewards for ${address} - ${tokenTag}: total of ${stakeAmount} ${tokenTag} in ${startDate.getFullYear()} is ${totalAmount.toFixed(
       2
     )}`
   );
